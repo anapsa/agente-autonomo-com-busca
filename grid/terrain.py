@@ -2,8 +2,9 @@ import pygame
 import numpy as np
 import random
 import math
-from agente import Agent
-from coin import Coin  # Supondo que salvou a classe Coin em coin.py
+from grid.agente import Agent
+from grid.coin import Coin  # Supondo que salvou a classe Coin em coin.py
+from search.bfs import Bfs
 
 
 
@@ -72,6 +73,8 @@ def get_color(value):
 def main():
     grid_size = 80
     tile_size = 10  # Tiles maiores
+    overlay = pygame.Surface((tile_size, tile_size), pygame.SRCALPHA)
+    overlay.fill((100, 100, 100, 120))  # R,G,B,Alpha (0–255)
     width = grid_size * tile_size
     height = grid_size * tile_size
 
@@ -84,33 +87,50 @@ def main():
     agent = Agent(terrain, tile_size)
     coin = Coin(terrain, tile_size)
 
-
+    #testando o BFS
+    path, visit_order = Bfs(terrain, agent.position, coin.position)
+    step_idx = 0
+    searching = True
 
     clock = pygame.time.Clock()
 
     running = True
     while running:
-        clock.tick(60)  # Limitar FPS
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+        clock.tick(180)
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
                 running = False
 
-        # Desenhar terreno
+        # 1) Desenha o terreno base
         for y in range(grid_size):
             for x in range(grid_size):
-                value = terrain[y][x]
-                color = get_color(value)
                 pygame.draw.rect(
                     screen,
-                    color,
-                    (x * tile_size, y * tile_size, tile_size, tile_size)
+                    get_color(terrain[y][x]),
+                    (x*tile_size, y*tile_size, tile_size, tile_size)
+                )
+
+        # 2) Se ainda estamos na fase de busca, avança o índice
+        if searching and step_idx < len(visit_order):
+            step_idx += 1
+        else:
+            searching = False
+
+        # 3) Pinta **todos** os visitados até step_idx em cinza
+        for vx, vy in visit_order[:step_idx]:
+            screen.blit(overlay, (vx * tile_size, vy * tile_size))
+
+        # 4) Se a busca já terminou, pinta o caminho em vermelho
+        if not searching:
+            for cx, cy in path:
+                pygame.draw.rect(
+                    screen,
+                    (200, 0, 0), 
+                    (cx*tile_size, cy*tile_size, tile_size, tile_size)
                 )
         
         agent.draw(screen)
         coin.draw(screen)
-
-
         pygame.display.flip()
 
     pygame.quit()
