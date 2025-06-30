@@ -1,31 +1,50 @@
-import pygame
-import numpy as np
+
 import random
-import math
+import pygame
 
 class Coin:
-    def __init__(self, terrain, tile_size):
-        self.terrain = terrain
-        self.grid_size = terrain.shape[0]
+    """
+    Representa a comida (moeda) no grid:
+      - spawn(): escolhe posição aleatória em célula não‑obstáculo
+      - draw(): desenha a moeda no Pygame
+      - collected: contador de quantas moedas já foram coletadas
+    """
+    def __init__(self, grid, tile_size):
+        self.grid = grid
         self.tile_size = tile_size
-        self.position = self.spawn()
+        self.position = None
+        self.collected = 0
 
     def spawn(self):
+        """
+        Gera uma nova posição aleatória em célula passável.
+        Atualiza self.position.
+        """
+        w, h = self.grid.width, self.grid.height
         while True:
-            x = random.randint(0, self.grid_size - 1)
-            y = random.randint(0, self.grid_size - 1)
-            # Garante que a moeda não esteja na água
-            if self.terrain[y][x] >= 0.3:
-                return (x, y)
+            x = random.randrange(w)
+            y = random.randrange(h)
+            if self.grid.is_passable(x, y):
+                self.position = (x, y)
+                return self.position
+
+    def collect(self):
+        """
+        Registra a coleta da moeda.
+        Deve ser chamado quando agente colidir com self.position.
+        """
+        self.collected += 1
+        self.position = None  # para forçar novo spawn
 
     def draw(self, screen):
-        center_x = self.position[0] * self.tile_size + self.tile_size // 2
-        center_y = self.position[1] * self.tile_size + self.tile_size // 2
-        radius = int(self.tile_size * 1.2)
-
-        pygame.draw.circle(
-            screen,
-            (255, 215, 0),  # Cor dourada (amarelo ouro)
-            (center_x, center_y),
-            radius
-        )
+        """
+        Desenha a moeda no grid. 
+        Usa um círculo dourado no centro da célula.
+        """
+        if self.position is None:
+            return
+        x, y = self.position
+        cx = x * self.tile_size + self.tile_size // 2
+        cy = y * self.tile_size + self.tile_size // 2
+        radius = int(self.tile_size * 0.4)
+        pygame.draw.circle(screen, (255, 215, 0), (cx, cy), radius)

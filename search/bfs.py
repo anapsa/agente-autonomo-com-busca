@@ -1,42 +1,37 @@
-# TO-DO: implementar a bfs
+# search/bfs.py
+
 from collections import deque
 
-def Bfs(grid, posAgente, posCoin):
-    N = len(grid)
-    fila = deque([ (posAgente[0], posAgente[1]) ])
-    direcoes = [(0,1), (0,-1), (1,0), (-1,0)]
+def bfs(posAgente, posCoin, grid):
+    N = grid.width
+    fila = deque([posAgente])
     visitado = [[False]*N for _ in range(N)]
-    visit_order = []
-    pai = [[None]*N for _ in range(N)] # diz de que celula cada celula foi alcançada
-    coin = (posCoin[0], posCoin[1])
-
+    visit_order = []        # ordem dos expandidos
+    came_from = { posAgente: None }
+    frontier = [ posAgente ]
+    
+    # marca o nó inicial
     visitado[posAgente[1]][posAgente[0]] = True
-    visit_order.append(((posAgente[0], posAgente[1])))
+    visit_order.append(posAgente)
 
     while fila:
-        x, y = fila.popleft() 
-        if (x,y) == coin:
-            path = reconstruirCaminho(pai, (posAgente[0], posAgente[1]), posCoin)
-            return path, visit_order
-        
-        for dx, dy in direcoes: #para calcular os prox passos
-            nx = x + dx
-            ny = y + dy
+        current = fila.popleft()
+        # remove da fronteira
+        if current in frontier:
+            frontier.remove(current)
 
-            if (0<= nx < N) and (0 <= ny < N) and not visitado[ny][nx]:
-                visitado[ny][nx] = True
-                pai[ny][nx] = (x,y)
+        # se achou a moeda, retorna tudo
+        if current == posCoin:
+            return came_from, visit_order, frontier
+
+        x, y = current
+        for nx, ny in grid.neighbors(x,y):
+            if not visitado[ny][nx]:
+                visitado[ny][nx]   = True
+                came_from[(nx, ny)] = current
                 visit_order.append((nx, ny))
-                fila.append((nx,ny))
+                fila.append((nx, ny))
+                frontier.append((nx, ny))
 
-    return [], visit_order #quando não tem caminho
-
-def reconstruirCaminho(pai, posAgente, posCoin):
-    caminho = []
-    atual = posCoin
-    # anda “para trás” pelos ponteiros pai até chegar em start
-    while atual != posAgente:
-        caminho.insert(0, atual)
-        atual = pai[atual[1]][atual[0]]
-    caminho.insert(0, posAgente)
-    return caminho
+    # sem caminho até a moeda
+    return came_from, visit_order, frontier
