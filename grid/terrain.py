@@ -1,10 +1,5 @@
-import pygame
-import numpy as np
+from typing import Optional, Dict
 import random
-import math
-from grid.agente import Agent
-from grid.coin import Coin  # Supondo que salvou a classe Coin em coin.py
-from search.bfs import bfs
 
 class Terrain:
     """
@@ -16,25 +11,29 @@ class Terrain:
     """
 
     # custos por tipo de terreno
-    TERRAIN_COSTS = {
+    TERRAIN_COSTS: Dict[str, Optional[int]] = {
         'OBSTACLE': None,
         'SAND':     1,
         'SWAMP':    5,
         'WATER':    10,
     }
 
-    def __init__(self, width: int, height: int,
-                 probs: dict[str, float] | None = None):
+    def __init__(
+        self,
+        width: int,
+        height: int,
+        probs: Optional[Dict[str, float]] = None
+    ):
         """
         width, height: dimensões do grid em colunas e linhas.
-        probs: probabilidades de cada tipo de terreno, 
+        probs: probabilidades de cada tipo de terreno,
                ex: {'OBSTACLE':0.1, 'SAND':0.4, 'SWAMP':0.3, 'WATER':0.2}
         """
-        self.width  = width
+        self.width = width
         self.height = height
 
         # probabilidades padrão (podem ser ajustadas)
-        self.probs = probs or {
+        self.probs: Dict[str, float] = probs or {
             'OBSTACLE': 0.1,
             'SAND':     0.4,
             'SWAMP':    0.3,
@@ -42,12 +41,12 @@ class Terrain:
         }
 
         # gera o grid
-        self.grid = [
-            [ self._random_cell() for _ in range(self.width) ]
+        self.grid: list[list[Optional[int]]] = [
+            [self._random_cell() for _ in range(self.width)]
             for _ in range(self.height)
         ]
 
-    def _random_cell(self):
+    def _random_cell(self) -> Optional[int]:
         """Escolhe um tipo de terreno pela distribuição de probs."""
         r = random.random()
         acc = 0.0
@@ -72,13 +71,13 @@ class Terrain:
             raise ValueError(f"Célula ({x},{y}) é obstáculo — agente não pode passar.")
         return c
 
-    def reset(self):
+    def reset(self) -> None:
         """Regenera todo o mapa aleatoriamente, reiniciando self.grid."""
         self.grid = [
-            [ self._random_cell() for _ in range(self.width) ]
+            [self._random_cell() for _ in range(self.width)]
             for _ in range(self.height)
         ]
 
-    def __getitem__(self, row: int) -> list[int | None]:
+    def __getitem__(self, row: int) -> list[Optional[int]]:
         """Permite acesso direto terrain[y][x] para renderização."""
         return self.grid[row]
