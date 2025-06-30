@@ -3,7 +3,7 @@ import pygame
 from grid.grid import Grid
 from grid.coin import Coin
 from search.bfs import bfs
-# from search.dfs import dfs
+from search.dfs import dfs
 from search.ucs import ucs
 # from search.astar import astar
 # from search.greedy import greedy
@@ -53,8 +53,8 @@ class Agent:
 
         if method == 'bfs':
             came_from, self.visited, self.frontier = bfs(start, goal, self.grid)
-        # elif method == 'dfs':
-        #     came_from, self.visited, self.frontier = dfs(start, goal, self.grid)
+        elif method == 'dfs':
+            came_from, self.visited, self.frontier = dfs(start, goal, self.grid)
         elif method == 'ucs':
             came_from, self.visited, self.frontier = ucs(start, goal, self.grid)
         # elif method == 'greedy':
