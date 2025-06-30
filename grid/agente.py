@@ -4,7 +4,7 @@ from grid.grid import Grid
 from grid.coin import Coin
 from search.bfs import bfs
 from search.dfs import dfs
-# from search.ucs import ucs
+from search.ucs import ucs
 # from search.astar import astar
 # from search.greedy import greedy
 
@@ -42,7 +42,7 @@ class Agent:
         """ Enxerga a comida e define o objetivo. """
         self.goal = coin.position
 
-    def find_path(self, method: str = 'bfs'):
+    def find_path(self, method: str = 'ucs'):
         """
         Executa a busca escolhida e preenche:
           self.path, self.visited, self.frontier
@@ -55,8 +55,8 @@ class Agent:
             came_from, self.visited, self.frontier = bfs(start, goal, self.grid)
         elif method == 'dfs':
             came_from, self.visited, self.frontier = dfs(start, goal, self.grid)
-        # elif method == 'ucs':
-        #     came_from, self.visited, self.frontier = ucs(start, goal, self.grid)
+        elif method == 'ucs':
+            came_from, self.visited, self.frontier = ucs(start, goal, self.grid)
         # elif method == 'greedy':
         #     came_from, self.visited, self.frontier = greedy(start, goal, self.grid, self.heuristic)
         # else:  # 'astar'
