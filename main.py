@@ -1,5 +1,4 @@
 # main.py
-
 import pygame, sys, random
 from grid.terrain import Terrain
 from grid.grid import Grid
@@ -54,7 +53,7 @@ def main():
         traveled = []
 
     # primeira busca
-    restart_search(method=current_method)
+    restart_search(method = "bfs")
 
     running = True
     while running:
@@ -126,10 +125,10 @@ def main():
                 # coleta e reinicia
                 if agent.position == coin.position:
                     coin.collect()
-                    restart_search(method='bfs')
+                    restart_search(method=current_method)
                 else:
                     # sem caminho, apenas reinicia
-                    restart_search(method='bfs')
+                    restart_search(method=current_method)
 
     pygame.quit()
     sys.exit()
