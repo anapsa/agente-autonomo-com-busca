@@ -7,7 +7,7 @@ from search.bfs import bfs
 from search.dfs import dfs
 from search.ucs import ucs
 from search.greedy import greedy
-# from search.astar import astar
+from search.astar import astar
 
 class Agent:
     """
@@ -65,8 +65,8 @@ class Agent:
             came_from, self.visited, self.frontier = ucs(start, goal, self.grid)
         elif method == 'greedy':
             came_from, self.visited, self.frontier = greedy(start, goal, self.grid)
-        # else:  # 'astar'
-        #     came_from, self.visited, self.frontier = astar(start, goal, self.grid, self.heuristic)
+        elif method == 'astar':
+            came_from, self.visited, self.frontier = astar(start, goal, self.grid)
 
         
         self.path = []
