@@ -34,7 +34,7 @@ def main():
 
     # lista de buscas disponíveis e índice atual
     methods = ['bfs','dfs','ucs','greedy','astar']
-    method_idx = 0
+    method_idx = 3
     current_method = methods[method_idx]
     # cria fonte para desenhar texto
     font = pygame.font.SysFont(None, 24)
@@ -53,7 +53,7 @@ def main():
         traveled = []
 
     # primeira busca
-    restart_search(method = "bfs")
+    restart_search(method = "greedy")
 
     running = True
     while running:
