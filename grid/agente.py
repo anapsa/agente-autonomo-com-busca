@@ -1,36 +1,42 @@
 import random
 import pygame
+from typing import Tuple, Optional, Dict, List
 from grid.grid import Grid
 from grid.coin import Coin
 from search.bfs import bfs
 from search.dfs import dfs
 from search.ucs import ucs
-# from search.astar import astar
 from search.greedy import greedy
-
+# from search.astar import astar
 
 class Agent:
     """
     Agente que:
       - nasce em posição aleatória em célula passável
       - percebe a posição da comida (goal)
-      - escolhe método de busca (bfs, dfs, ucs, greedy, astar)
-      - executa a busca retornando path, visited e frontier
-      - desloca-se passo a passo, ajustando sua “velocidade” ao custo do terreno
-      - desenha-se no Pygame
+      - executa busca (BFS, DFS, UCS, Greedy, A*)
+      - armazena lista de visitados, fronteira e caminho
+      - desloca-se passo a passo, ajustando velocidade ao custo
+      - não remove o caminho original, usa índice para animação
     """
-    def __init__(self, grid: Grid, tile_size: int, heuristic: str = 'manhattan'):
+    def __init__(
+        self,
+        grid: Grid,
+        tile_size: int,
+        heuristic: str = 'manhattan'
+    ):
         self.grid = grid
         self.tile_size = tile_size
         self.heuristic = heuristic
-        self.position = None     # (x, y)
-        self.goal = None         # (x, y)
-        self.path = []           # lista de (x,y) do caminho até goal
-        self.visited = []        # nós já expandidos pela busca
-        self.frontier = []       # fronteira durante a busca
+        self.position: Tuple[int, int] = (0, 0)
+        self.goal: Optional[Tuple[int, int]] = None
+        self.visited: List[Tuple[int, int]] = []
+        self.frontier: List[Tuple[int, int]] = []
+        self.path: List[Tuple[int, int]] = []
+        self.path_idx: int = 0  
 
-    def spawn(self):
-        """ Coloca o agente em uma célula aleatória não‑obstáculo. """
+    def spawn(self) -> None:
+        """Posiciona o agente em célula passável aleatória."""
         w, h = self.grid.width, self.grid.height
         while True:
             x, y = random.randrange(w), random.randrange(h)
@@ -38,19 +44,19 @@ class Agent:
                 self.position = (x, y)
                 return
 
-    def perceive(self, coin: Coin):
-        """ Enxerga a comida e define o objetivo. """
+    def perceive(self, coin: Coin) -> None:
+        """Define o estado objetivo como a posição da moeda."""
         self.goal = coin.position
 
-    def find_path(self, method: str = 'ucs'):
+    def find_path(self, method: str = 'bfs') -> None:
         """
-        Executa a busca escolhida e preenche:
-          self.path, self.visited, self.frontier
-        method ∈ {'bfs','dfs','ucs','greedy','astar'}
+        Executa busca, popula:
+          self.visited: ordem de expansão
+          self.frontier: nós remanescentes ao encontrar goal
+          self.path: lista de células do caminho
+        Reinicia self.path_idx para animação.
         """
-        start = self.position
-        goal = self.goal
-
+        start, goal = self.position, self.goal
         if method == 'bfs':
             came_from, self.visited, self.frontier = bfs(start, goal, self.grid)
         elif method == 'dfs':
@@ -62,7 +68,7 @@ class Agent:
         # else:  # 'astar'
         #     came_from, self.visited, self.frontier = astar(start, goal, self.grid, self.heuristic)
 
-        # Reconstrói o caminho final do goal de volta ao start
+        
         self.path = []
         node = goal
         while node is not None and node in came_from:
@@ -70,21 +76,28 @@ class Agent:
             node = came_from[node]
         self.path.reverse()
 
-    def move_step(self):
+        self.path_idx = 0
+
+    def move_step(self) -> Optional[Tuple[int, int]]:
         """
-        Move um passo ao longo de self.path.
-        Retorna a célula nova ou None se o caminho já terminou.
+        Move um passo ao longo de self.path sem removê-la.
+        Retorna a nova posição, ou None quando acabar, e limpa path ao final.
         """
-        if not self.path:
+       
+        if self.path_idx >= len(self.path):
             return None
-        next_cell = self.path.pop(0)
+        next_cell = self.path[self.path_idx]
         self.position = next_cell
+        self.path_idx += 1
+        
+        if self.path_idx >= len(self.path):
+            self.path = []
         return next_cell
 
-    def draw(self, screen: pygame.Surface):
-        """ Desenha o agente no screen do Pygame. """
+    def draw(self, screen: pygame.Surface) -> None:
+        """Desenha o agente na tela como um círculo."""
         x, y = self.position
         cx = x * self.tile_size + self.tile_size // 2
         cy = y * self.tile_size + self.tile_size // 2
-        radius = int(self.tile_size * 0.4)
-        pygame.draw.circle(screen, (200, 0, 200), (cx, cy), radius)
+        r = int(self.tile_size * 0.4)
+        pygame.draw.circle(screen, (200, 0, 200), (cx, cy), r)
