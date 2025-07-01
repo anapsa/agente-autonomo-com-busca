@@ -1,5 +1,3 @@
-# TO-DO: implementar o a*
-
 import heapq
 
 def astar(posAgente, posCoin, grid):
